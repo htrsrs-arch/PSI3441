@@ -1,0 +1,86 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "C:/PSI3441/Projetos/atividade_7/include",
+                "C:/PSI3441/Projetos/atividade_7/src",
+                "C:/PSI3441/Projetos/atividade_7/.pio/build/frdm_k64f/zephyr/include/generated/zephyr",
+                "C:/PlatformIO_Core/packages/framework-zephyr/include",
+                "C:/PSI3441/Projetos/atividade_7/.pio/build/frdm_k64f/zephyr/include/generated",
+                "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis",
+                "C:/PlatformIO_Core/packages/framework-zephyr/lib/libc/newlib/include",
+                "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis/k6x",
+                "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis/common",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/cmsis/CMSIS/Core/Include",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/cmsis_6/CMSIS/Core/Include",
+                "C:/PlatformIO_Core/packages/framework-zephyr/modules/cmsis_6",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk/devices/MK64F12",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk/devices/MK64F12/drivers",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/common",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/port",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/sysmpu",
+                "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/uart",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "C:/PSI3441/Projetos/atividade_7/include",
+                    "C:/PSI3441/Projetos/atividade_7/src",
+                    "C:/PSI3441/Projetos/atividade_7/.pio/build/frdm_k64f/zephyr/include/generated/zephyr",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/include",
+                    "C:/PSI3441/Projetos/atividade_7/.pio/build/frdm_k64f/zephyr/include/generated",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/lib/libc/newlib/include",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis/k6x",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/soc/nxp/kinetis/common",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/cmsis/CMSIS/Core/Include",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/cmsis_6/CMSIS/Core/Include",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/modules/cmsis_6",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk/devices/MK64F12",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk/devices/MK64F12/drivers",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/common",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/port",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/sysmpu",
+                    "C:/PlatformIO_Core/packages/framework-zephyr/_pio/modules/hal/nxp/mcux/mcux-sdk-ng/drivers/uart",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60119",
+                "CPU_MK64FN1M0VLL12",
+                "KERNEL",
+                "K_HEAP_MEM_POOL_SIZE=0",
+                "NDEBUG",
+                "_ANSI_SOURCE",
+                "__LINUX_ERRNO_EXTENSIONS__",
+                "__PROGRAM_START",
+                "__ZEPHYR__=1",
+                ""
+            ],
+            "cStandard": "c99",
+            "forcedInclude": [
+                "C:/PSI3441/Projetos/atividade_7/.pio/build/frdm_k64f/zephyr/include/generated/zephyr/autoconf.h",
+                "C:/PlatformIO_Core/packages/framework-zephyr/include/zephyr/toolchain/zephyr_stdint.h",
+                ""
+            ],
+            "compilerPath": "C:/PlatformIO_Core/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe",
+            "compilerArgs": [
+                "-mcpu=cortex-m4",
+                "-mthumb",
+                "-mabi=aapcs",
+                "-mfp16-format=ieee",
+                "-isystem",
+                "C:/PlatformIO_Core/packages/framework-zephyr/lib/libc/common/include",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
