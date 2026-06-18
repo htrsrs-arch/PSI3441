@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "260617-180432-zephyr-blink",
+			"path": "../../../PlatformIO_Core/Projects/260617-180432-zephyr-blink"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,9 @@
+/*
+ * O arquivo frdm_k64f.dts já define tudo que é necessário:
+ *   - alias pwm-trigger → pwm_trigger_ch (FTM0_CH0 / PTC1, período 20 ms)
+ *   - &ftm0 habilitado com pinctrl FTM0_CH0_PTC1
+ *   - &ftm3 habilitado com pinctrl FTM3_CH4_PTC8 e FTM3_CH5_PTC9
+ *   - alias hc-sr04 → hcsr04 (trigger GPIO PTB9 / echo GPIO PTB23)
+ *
+ * Nenhuma configuração adicional de overlay é necessária.
+ */
