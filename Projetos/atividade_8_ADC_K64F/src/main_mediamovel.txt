@@ -1,0 +1,107 @@
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/logging/log.h>
+#include "adc_helper.h"
+
+LOG_MODULE_REGISTER(adc_combined, LOG_LEVEL_INF);
+
+#define STACK_SIZE      1024
+#define THREAD_PRIORITY 7
+
+struct adc_combined_data {
+    uint32_t timestamp;
+    float ch0_raw;
+    float ch0_filt;
+};
+
+K_MSGQ_DEFINE(msgq_combined, sizeof(struct adc_combined_data), 2, 4);
+
+static uint32_t dropped_samples   = 0;
+static uint32_t successful_samples = 0;
+
+#define NUM_TAPS 50
+const float fir_coeffs[NUM_TAPS]    = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
+static float history_ch0[NUM_TAPS]  = {0};
+static int   filter_idx             = 0;
+
+void apply_fir_filter(float in, float *out)
+{
+    history_ch0[filter_idx] = in;
+    *out = 0.0f;
+
+    for (int i = 0; i < NUM_TAPS; i++) {
+        int idx = (filter_idx - i + NUM_TAPS) % NUM_TAPS;
+        *out += history_ch0[idx] * fir_coeffs[i];
+    }
+    filter_idx = (filter_idx + 1) % NUM_TAPS;
+}
+
+void acq_thread_entry(void *p1, void *p2, void *p3)
+{
+    struct adc_combined_data data;
+
+    LOG_INF("Thread de Aquisicao ADC (Bruto + FIR) inicializada.");
+
+    while (1) {
+        data.timestamp = k_uptime_get_32();
+        data.ch0_raw   = adc_helper_read_voltage();
+
+        apply_fir_filter(data.ch0_raw, &data.ch0_filt);
+
+        int ret = k_msgq_put(&msgq_combined, &data, K_NO_WAIT);
+        if (ret == -ENOMSG) {
+            dropped_samples++;
+            LOG_WRN("Amostra descartada! TS: %u", data.timestamp);
+        }
+
+        k_sleep(K_MSEC(5));
+    }
+}
+
+void comm_thread_entry(void *p1, void *p2, void *p3)
+{
+    struct adc_combined_data data;
+    uint32_t last_report_time = k_uptime_get_32();
+
+    LOG_INF("Thread de Comunicacao inicializada.");
+
+    while (1) {
+        if (k_msgq_get(&msgq_combined, &data, K_FOREVER) == 0) {
+
+            int r_int  = (int)data.ch0_raw;
+            int r_frac = __builtin_abs((int)((data.ch0_raw  - r_int) * 1000000));
+            int f_int  = (int)data.ch0_filt;
+            int f_frac = __builtin_abs((int)((data.ch0_filt - f_int) * 1000000));
+
+            printk("T: %u, CH0R: %d.%06d, CH0F: %d.%06d\r\n",
+                   data.timestamp, r_int, r_frac, f_int, f_frac);
+
+            successful_samples++;
+
+            uint32_t now = k_uptime_get_32();
+            if (now - last_report_time >= 1000) {
+                uint32_t elapsed        = now - last_report_time;
+                uint32_t effective_rate = (successful_samples * 1000) / elapsed;
+
+                LOG_INF("[METRICAS] Taxa: %u Hz | Perdidas (ultimo 1s): %u",
+                        effective_rate, dropped_samples);
+
+                successful_samples = 0;
+                dropped_samples    = 0;
+                last_report_time   = now;
+            }
+        }
+    }
+}
+
+K_THREAD_DEFINE(acq_thread_id,  STACK_SIZE, acq_thread_entry,  NULL, NULL, NULL, THREAD_PRIORITY, 0, 0);
+K_THREAD_DEFINE(comm_thread_id, STACK_SIZE, comm_thread_entry, NULL, NULL, NULL, THREAD_PRIORITY, 0, 0);
+
+int main(void)
+{
+    if (adc_helper_init() != 0) {
+        LOG_ERR("Erro ao inicializar ADC.");
+        return -1;
+    }
+    return 0;
+}

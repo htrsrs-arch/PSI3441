@@ -1,0 +1,92 @@
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/logging/log.h>
+#include "adc_helper.h"
+
+LOG_MODULE_REGISTER(adc_raw_threads, LOG_LEVEL_INF);
+
+#define STACK_SIZE 1024
+#define ACQ_PRIORITY  5
+#define COMM_PRIORITY 7
+
+// Estrutura simplificada contendo apenas o dado bruto
+struct adc_raw_data {
+    uint32_t timestamp;
+    float ch0_raw;
+};
+
+// Fila de mensagens para comunicação segura inter-threads
+K_MSGQ_DEFINE(msgq_raw, sizeof(struct adc_raw_data), 5, 4);
+
+static volatile uint32_t dropped_samples = 0;
+static volatile uint32_t successful_samples = 0;
+
+// [x] THREAD DE AQUISIÇÃO (PRODUTOR - ALTA PRIORIDADE)
+void acq_thread_entry(void *p1, void *p2, void *p3)
+{
+    struct adc_raw_data data;
+    LOG_INF("Thread de Aquisicao (SINAL BRUTO) inicializada.");
+
+    while (1) {
+        data.timestamp = k_uptime_get_32();
+        data.ch0_raw   = adc_helper_read_voltage(); // Sem filtros aqui
+
+        // Envia para a fila sem bloquear se estiver cheia
+        int ret = k_msgq_put(&msgq_raw, &data, K_NO_WAIT);
+        if (ret == -ENOMSG) {
+            dropped_samples++;
+        }
+
+        // Intervalo rápido de amostragem (2ms = ~500Hz desejados)
+        k_sleep(K_MSEC(5));
+    }
+}
+
+// [x] THREAD DE COMUNICAÇÃO (CONSUMIDOR - BAIXA PRIORIDADE)
+void comm_thread_entry(void *p1, void *p2, void *p3)
+{
+    struct adc_raw_data data;
+    uint32_t last_report_time = k_uptime_get_32();
+
+    LOG_INF("Thread de Comunicacao inicializada.");
+
+    while (1) {
+        // Bloqueia aguardando a chegada de novas leituras brutas
+        if (k_msgq_get(&msgq_raw, &data, K_FOREVER) == 0) {
+            
+            int r_int  = (int)data.ch0_raw;
+            int r_frac = __builtin_abs((int)((data.ch0_raw - r_int) * 1000000));
+
+            // String otimizada contendo apenas o canal bruto
+            LOG_INF("T: %u, CH0R: %d.%06d", data.timestamp, r_int, r_frac);
+
+            successful_samples++;
+
+            // Geração de relatório de métricas a cada 1 segundo (1000 ms)
+            uint32_t now = k_uptime_get_32();
+            if (now - last_report_time >= 1000) {
+                uint32_t elapsed        = now - last_report_time;
+                uint32_t effective_rate = (successful_samples * 1000) / elapsed;
+
+                // Linha de métricas padronizada para o Python capturar facilmente
+                LOG_INF("[METRICAS] Taxa: %u Hz | Perdidas: %u", effective_rate, dropped_samples);
+
+                successful_samples = 0;
+                dropped_samples    = 0;
+                last_report_time   = now;
+            }
+        }
+    }
+}
+
+K_THREAD_DEFINE(acq_thread_id, STACK_SIZE, acq_thread_entry, NULL, NULL, NULL, ACQ_PRIORITY, 0, 0);
+K_THREAD_DEFINE(comm_thread_id, STACK_SIZE, comm_thread_entry, NULL, NULL, NULL, COMM_PRIORITY, 0, 0);
+
+int main(void)
+{
+    if (adc_helper_init() != 0) {
+        LOG_ERR("Erro ao inicializar ADC.");
+        return -1;
+    }
+    return 0;
+}
